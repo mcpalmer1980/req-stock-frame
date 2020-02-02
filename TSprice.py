@@ -23,7 +23,7 @@ async def gatherPrices(tickers:list):
         results = await asyncio.gather(*tasks)
     return results
 
-def buildTimeSeries(tickers:list, timepoints = 3, delay = 2) :
+def buildTimeSeries(tickers:list, timepoints = 4, delay = 2) :
     'get data for tickers list and run time series analysis for x timepoints'
     df = pd.DataFrame(columns=[
             'timepoint',
@@ -40,10 +40,11 @@ def buildTimeSeries(tickers:list, timepoints = 3, delay = 2) :
 
         # df = df.append(additions)
         time.sleep(delay)
+    # return df.pivot_table(index="ticker", columns="timepoint")
     return df
 
-stxlist = ['AAPL','AMZN']
-res = asyncio.run(gatherPrices(stxlist))
-print(res)
-tmp = buildTimeSeries(stxlist)
-print(tmp)
+# stxlist = ['AAPL','AMZN']
+# res = asyncio.run(gatherPrices(stxlist))
+# print(res)
+# tmp = buildTimeSeries(stxlist)
+# print(tmp)
