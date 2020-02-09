@@ -3,7 +3,7 @@ import time
 import statsmodels.api as sm 
 from scipy import stats
 import TSprice
-
+from typing import Tuple, List, Dict
 
 l = ['AAPL','AMZN','TSLA']
 df = TSprice.buildTimeSeries(l)
@@ -16,11 +16,14 @@ def extract_lr(x):
 df3 = df.groupby('ticker').apply(extract_lr)
 print(df3)
 
-algos= pd.Dataframe()
+ticker: str
+activeAlgos: List[Tuple[ticker, algo]]
 
 
-def run_active_algos(mkdstat_df, position_df, algoTracker_df):
-    pass
+def runActiveAlgos(activeAlgos) -> None:
+    for tk, algo in activeAlgos:
+        algo(tk)
+
 
 def run_new_algos:
     pass
@@ -36,8 +39,8 @@ while datetime.datetime.now() < market_close:
     df = TSprice.buildTimeSeries(l)
     mktstatus= df.groupby('ticker').apply(extract_lr)
     positions = getPosition()
-    reconcile(positions, algos)
-    run_algos(mktstatus,positions, algos)
+    reconcile(positions, activeAlgos)
+    runActiveAlgos(mktstatus,positions, activeAlgos)
     find_opportunity(mktstatus)
 
 
