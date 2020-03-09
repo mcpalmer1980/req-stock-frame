@@ -28,19 +28,34 @@ def runActiveAlgos(activeAlgos) -> None:
 def run_new_algos:
     pass
 
-def reconcile(algos,positions) -> algos:
+def reconcile(activeAlgos) -> activeAlgos:
+    pos = getPosition(conn)
+
+
+def getPosition(ibxConnn) -> position:
     pass
 
 def find_opportunity(mkstatus) -> new_algo:
     pass
 
+def triage(conn) -> None:
+    pnlList = getPnl()
+    for tk, pnl in pnlList:
+        if pnl < -0.05:
+            sell(pk)
+
+
+
 market_close = datetime.datetime.now().replace(hour=16, minute=0) 
 while datetime.datetime.now() < market_close:
+    # first thing --- check pnl for each stock in portfolio
+    # sell any stock with 5% or more loss:
+    triage(ibxconn)
     df = TSprice.buildTimeSeries(l)
     mktstatus= df.groupby('ticker').apply(extract_lr)
-    positions = getPosition()
-    reconcile(positions, activeAlgos)
-    runActiveAlgos(mktstatus,positions, activeAlgos)
+    triage(ibxconn)
+    reconcile(activeAlgos)
+    runActiveAlgos(activeAlgos)
     find_opportunity(mktstatus)
 
 
