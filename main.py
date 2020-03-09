@@ -38,10 +38,10 @@ def triage(p: Portfolio, conn) -> Portfolio:
 ## New Function with dataclass and hints define
 mktStat: pd.DataFrame
 @dataclass
-class Trend: 
-    algoFn : 
-
-            
+class Trend:
+    Uptick: float    # percentage of stock trending up
+    Downtick: float  # percentage of stocks trending down
+    
 def findTrend(mks: mktStat) -> Trend:
     pass
 
@@ -60,6 +60,14 @@ def runActiveAlgo(p: Portfolio) -> None:
     pass
 
 
+## Stock Selection process
+## Find the stock and corresponding algo
+TradeStrategy: List[Tuple[ticker,algo]] 
+def selectStock(sp: SP500) -> TargetStrategy:
+    pass
+
+
+
 l = ['AAPL','AMZN','TSLA']
 market_close = datetime.datetime.now().replace(hour=16, minute=0) 
 pfl = Portfolio[]
@@ -68,9 +76,11 @@ while datetime.datetime.now() < market_close:
     # sell any stock with 5% or more loss:
     pfl = triage(pfl, ibxconn)
 
+    stockList = selectStocks()
+
     # step 2: get the dataframe with 5 time points
     # use this list for now; implement stock seletion later
-    df = TSprice.buildTimeSeries(l)
+    df = TSprice.buildTimeSeries()
 
     # perform regression to get market status
     mktstatus= df.groupby('ticker').apply(linearRegress)
