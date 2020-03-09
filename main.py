@@ -24,11 +24,15 @@ def getPosition(ibxConnn) -> position:
 ## This function is a side affect
 ## It will execute the algo and return nothing
 ## No need to define type
-def triage(conn) -> Portfolio:
+def triage(p: Portfolio, conn) -> Portfolio:
     pnlList = getPnl()
     for tk, pnl in pnlList:
         if pnl < -0.05:
             sell(pk)
+    # synchronize portfolio and algo list
+    p2 = reconcile(p)
+    return p2
+
 
 
 ## New Function with dataclass and hints define
@@ -58,10 +62,11 @@ def runActiveAlgo(p: Portfolio) -> None:
 
 l = ['AAPL','AMZN','TSLA']
 market_close = datetime.datetime.now().replace(hour=16, minute=0) 
+pfl = Portfolio[]
 while datetime.datetime.now() < market_close:
     # first thing --- check pnl for each stock in portfolio
     # sell any stock with 5% or more loss:
-    portfolio = triage(ibxconn)
+    pfl = triage(pfl, ibxconn)
 
     # step 2: get the dataframe with 5 time points
     # use this list for now; implement stock seletion later
@@ -70,20 +75,16 @@ while datetime.datetime.now() < market_close:
     # perform regression to get market status
     mktstatus= df.groupby('ticker').apply(linearRegress)
 
-    # triage again since previous 2 statements may take more than 2 minutes
-    # secon triage may not be necessary depending on performance
-    portfolio = triage(ibxconn)
-
-    # synchronize portfolio and algo list
-    reconcile(activeAlgos)
-
-    # after reconciling, the portfolio should be in sync with online account
     # all algos will make 2 decisions: keep or sell the stock
-    runActiveAlgos(portfolio)
+    # rerun all algo in the portfolio
+    runActiveAlgos(pfl)
 
     # this is self explanatory
     trend = findTrend(mktstatus)
-    runAlgo(trend)
+    algo = runAlgo(trend)
+    pfl = plf.addAlgo(algo)
+
+    
 
 
 
