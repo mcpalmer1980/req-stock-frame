@@ -41,6 +41,8 @@ def buildTimeSeries(tickers:list, timepoints = 4, delay = 2) -> pd.DataFrame:
         # df = df.append(additions)
         time.sleep(delay)
     # return df.pivot_table(index="ticker", columns="timepoint")
+
+
     return df
 
 # stxlist = ['AAPL','AMZN']
@@ -48,3 +50,14 @@ def buildTimeSeries(tickers:list, timepoints = 4, delay = 2) -> pd.DataFrame:
 # print(res)
 # tmp = buildTimeSeries(stxlist)
 # print(tmp)
+
+def linearRegress(x):
+    lr = stats.linregress(x['timepoint'].astype(int), x['price'].astype(float))
+    return lr.slope
+
+def getMarketStatus(tickers: list, timepoints: int = 4, delay: int = 3) -> marketStatus:
+    df = buildTimeSeries(tickers, timepoints, delay)
+    marketStatus = df.groupby('ticker').apply(linearRegress)
+    return marketStatus(
+        timeSeries = df,
+        marketStatus = marketStatus)
