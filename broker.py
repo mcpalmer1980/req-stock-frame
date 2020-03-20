@@ -11,18 +11,21 @@ The module will search the 'alpaca_secret' enviroment variable followed by the c
 import typing
 import alpaca_trade_api as tradeapi
 import os
-import pyperclip
 
-endpoint = "https://paper-api.alpaca.markets"
-key = "PKRE8PFNC2XVNA5CQWG8"
-
-def sell(ticker: str) -> None:
+def sell(ticker: str, qty: int = None) -> None:
     assert api, "Not connected to alpaca trade api"
+    try:
+        position = api.get_position(ticker)
+    except:
+        print(f'Cannot sell {ticker}')
+        return
+
+    qty = qty or position.qty
     api.submit_order(
         symbol=ticker,
         side='sell',
         type='market',
-        qty=quantity,
+        qty=qty,
         time_in_force='day')
 
 def buy(ticker: str, quantity: int) -> None:
@@ -35,38 +38,53 @@ def buy(ticker: str, quantity: int) -> None:
         time_in_force='day')
 
 def sellAll() -> None:
-    pass
+    for position in getPositions():
+        sell(position.symbol)
 
 def getPositions() -> None:
     assert api, "Not connected to alpaca trade api"
-    positions = api.list_positions()
-    print(positions)
+    portfolio = api.list_positions()
 
-def getSecretKey() -> str:
-    clipboard = pyperclip.paste()
-    envVar = os.getenv('alpaca_secret')
-    secret = envVar or clipboard
-    assert secret, "No Alpaca secret found"
-    return secret
+    # Print the quantity of shares for each position.
+    for position in portfolio:
+        print("{} shares of {}".format(position.qty, position.symbol))
+    for position in portfolio:
+        print(position)
+    return
 
-def connect(secret_key : str = '') -> None:
+def getConfig() -> [str, str, str]:
+    configFile = os.path.join(os.path.expanduser('~'), 'alpaca_secrets')
+    try:
+        with open(configFile, 'r') as data:
+            endpoint, public, secret = data.read().splitlines()
+    except:
+        print('Failed loading config from ~/alpaca_secrets')
+        endpoint, public, secret = '', '', ''
+
+    return endpoint, public, secret
+
+def connect(endpoint: str = '',
+            public_key: str = '',
+            secret_key: str = '') -> None   :
     global api
-    if not secret_key:
-        secret_key = getSecretKey()
+    if not endpoint or not public_key or not secret_key:
+        endpoint, public_key, secret_key = getConfig()
 
     print('Connecting to alpaca trade api')
-    print(f'Trying secret key: {secret_key}')
+    print(f'\tEndpoint: {endpoint}\n\tPublic key: {public_key}\n\tSecret Key: {secret_key}')
 
-    try: # initiate connection or print error message if failed
-        api = tradeapi.REST(key, secret_key, endpoint)
+    try: # initiate connectionor print error message if failed
+        api = tradeapi.REST(public_key, secret_key, endpoint)
         print(api.get_account())
     except:
         api = None
         print('Failed connecting to alpaca trade api')
-        print("Set enviroment variable 'alpaca_secret' to secret key or copy it to clipboard")
+        print("Check your connection and verify config file in your user directory")
+        print("Visit https://alpaca.markets/ and login to find information")
+        print('Example for "~/alpaca_secrets"\n---\nendpoint\npublic_key\nprivate_key\n---')
 
 api = None
-connect()
+#connect()
 
 
 '''
@@ -85,4 +103,11 @@ def triage(p: Portfolio, conn) -> Portfolio:
 
 def reconcile(p: Portfolio) -> Portfolio:
     pos = getPosition(conn)
+
+def getSecretKey() -> str:
+    clipboard = pyperclip.paste()
+    envVar = os.getenv('alpaca_secret')
+    secret = envVar or clipboard
+    assert secret, "No Alpaca secret found"
+    return secret
 '''
